@@ -19,6 +19,7 @@ using Newtonsoft.Json;
 
 namespace LibraryAPI.Controllers
 {
+    [Authorize]
     [Route("api/[controller]/[action]")]
     [ApiController]
     public class BookController : ControllerBase
