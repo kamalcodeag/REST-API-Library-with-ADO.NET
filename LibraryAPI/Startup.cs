@@ -13,6 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 
 namespace LibraryAPI
 {
@@ -47,6 +48,10 @@ namespace LibraryAPI
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:Key"]))
                     };
                 });
+            services.AddSwaggerGen(options =>
+            {
+                options.SwaggerDoc(name: "v1", new OpenApiInfo { Title = "LibraryAPI by Kamal Guliyev", Version = "v1"});
+            });
             services.AddMvc();
         }
 
@@ -57,6 +62,14 @@ namespace LibraryAPI
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.UseSwagger();
+            app.UseSwaggerUI(options =>
+            {
+                options.SwaggerEndpoint(url: "/swagger/v1/swagger.json", name: "LibraryAPI V1");
+            });
+
+            //app.UseCors();
 
             app.UseHttpsRedirection();
 

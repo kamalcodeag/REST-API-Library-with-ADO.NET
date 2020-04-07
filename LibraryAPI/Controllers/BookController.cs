@@ -225,19 +225,5 @@ namespace LibraryAPI.Controllers
 
             return NoContent();
         }
-
-        //public string GetHash()
-        //{
-        //    //byte[] simpleBytes = new ASCIIEncoding().GetBytes("Kamal");
-        //    byte[] simpleBytes = Encoding.UTF8.GetBytes("Kamal");
-
-        //    using (SHA256 sha256 = SHA256.Create())
-        //    {
-        //        byte[] hashedBytes = sha256.ComputeHash(simpleBytes);
-        //        string hashedString = new ASCIIEncoding().GetString(hashedBytes);
-
-        //        return hashedString;
-        //    }
-        //}
     }
 }

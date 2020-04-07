@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
@@ -31,20 +32,48 @@ namespace LibraryAPI.Controllers
         [HttpPost]
         public ActionResult Login(string username, string password)
         {
-            User login = new User();
-            login.UserName = username;
-            login.Password = password;
             ActionResult response = Unauthorized();
 
-            var user = Helper.AuthenticateUser(login);
+            bool userExists = Helper.AuthenticateUser(username, Helper.GetHash(password), _connectionString);
 
-            if(user != null)
+            if (userExists)
             {
-                var token = Helper.GenerateJSONWebToken(user, _configuration);
+                var token = Helper.GenerateJSONWebToken(username, _configuration);
                 response = Ok(new { token = token });
             }
 
             return response;
+        }
+
+        [HttpPost]
+        public ActionResult<User> Register(User user)
+        {
+            bool userExists = Helper.CheckUserExists(user.UserName, _connectionString);
+
+            if(userExists)
+            {
+                return Conflict();
+            }
+
+            string ID = Guid.NewGuid().ToString();
+            string FullName = user.FullName;
+            string UserName = user.UserName;
+            string HashedPassword = Helper.GetHash(user.Password);
+            bool IsLocked = false;
+
+            using (SqlConnection connection = new SqlConnection(_connectionString))
+            {
+                SqlCommand command = new SqlCommand("insert into Users values(@ID, @FullName, @UserName, @HashedPassword, @IsLocked)", connection);
+                command.Parameters.AddWithValue("@ID", ID);
+                command.Parameters.AddWithValue("@FullName", FullName);
+                command.Parameters.AddWithValue("@UserName", UserName);
+                command.Parameters.AddWithValue("@HashedPassword", HashedPassword);
+                command.Parameters.AddWithValue("@IsLocked", IsLocked);
+                connection.Open();
+                command.ExecuteNonQuery();
+            }
+
+            return CreatedAtAction("Login", new { username = UserName }, user);
         }
     }
 }

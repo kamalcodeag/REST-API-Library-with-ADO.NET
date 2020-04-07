@@ -93,7 +93,6 @@ D:\Programming\Other\LibraryAPI\LibraryAPI\bin\Debug\netcoreapp3.1\runtimes\win-
 D:\Programming\Other\LibraryAPI\LibraryAPI\bin\Debug\netcoreapp3.1\runtimes\win-x86\native\sni.dll
 D:\Programming\Other\LibraryAPI\LibraryAPI\bin\Debug\netcoreapp3.1\runtimes\unix\lib\netcoreapp2.1\System.Data.SqlClient.dll
 D:\Programming\Other\LibraryAPI\LibraryAPI\bin\Debug\netcoreapp3.1\runtimes\win\lib\netcoreapp2.1\System.Data.SqlClient.dll
-D:\Programming\Other\LibraryAPI\LibraryAPI\obj\Debug\netcoreapp3.1\LibraryAPI.MvcApplicationPartsAssemblyInfo.cache
 D:\Programming\Other\LibraryAPI\LibraryAPI\obj\Debug\netcoreapp3.1\LibraryAPI.AssemblyInfoInputs.cache
 D:\Programming\Other\LibraryAPI\LibraryAPI\obj\Debug\netcoreapp3.1\LibraryAPI.AssemblyInfo.cs
 D:\Programming\Other\LibraryAPI\LibraryAPI\obj\Debug\netcoreapp3.1\LibraryAPI.RazorTargetAssemblyInfo.cache
@@ -102,3 +101,11 @@ D:\Programming\Other\LibraryAPI\LibraryAPI\obj\Debug\netcoreapp3.1\staticwebasse
 D:\Programming\Other\LibraryAPI\LibraryAPI\obj\Debug\netcoreapp3.1\staticwebassets\LibraryAPI.StaticWebAssets.xml
 D:\Programming\Other\LibraryAPI\LibraryAPI\obj\Debug\netcoreapp3.1\LibraryAPI.dll
 D:\Programming\Other\LibraryAPI\LibraryAPI\obj\Debug\netcoreapp3.1\LibraryAPI.pdb
+D:\Programming\Other\LibraryAPI\LibraryAPI\obj\Debug\netcoreapp3.1\LibraryAPI.genruntimeconfig.cache
+D:\Programming\Other\LibraryAPI\LibraryAPI\bin\Debug\netcoreapp3.1\Microsoft.OpenApi.dll
+D:\Programming\Other\LibraryAPI\LibraryAPI\bin\Debug\netcoreapp3.1\Swashbuckle.AspNetCore.Swagger.dll
+D:\Programming\Other\LibraryAPI\LibraryAPI\bin\Debug\netcoreapp3.1\Swashbuckle.AspNetCore.SwaggerGen.dll
+D:\Programming\Other\LibraryAPI\LibraryAPI\bin\Debug\netcoreapp3.1\Swashbuckle.AspNetCore.SwaggerUI.dll
+D:\Programming\Other\LibraryAPI\LibraryAPI\obj\Debug\netcoreapp3.1\LibraryAPI.csproj.CoreCompileInputs.cache
+D:\Programming\Other\LibraryAPI\LibraryAPI\obj\Debug\netcoreapp3.1\LibraryAPI.MvcApplicationPartsAssemblyInfo.cs
+D:\Programming\Other\LibraryAPI\LibraryAPI\obj\Debug\netcoreapp3.1\LibraryAPI.MvcApplicationPartsAssemblyInfo.cache
