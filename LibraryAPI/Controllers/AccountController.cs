@@ -30,27 +30,11 @@ namespace LibraryAPI.Controllers
         }
 
         [HttpPost]
-        public ActionResult Login(string username, string password)
-        {
-            ActionResult response = Unauthorized();
-
-            bool userExists = Helper.AuthenticateUser(username, Helper.GetHash(password), _connectionString);
-
-            if (userExists)
-            {
-                var token = Helper.GenerateJSONWebToken(username, _configuration);
-                response = Ok(new { token = token });
-            }
-
-            return response;
-        }
-
-        [HttpPost]
         public ActionResult<User> Register(User user)
         {
             bool userExists = Helper.CheckUserExists(user.UserName, _connectionString);
 
-            if(userExists)
+            if (userExists)
             {
                 return Conflict();
             }
@@ -74,6 +58,20 @@ namespace LibraryAPI.Controllers
             }
 
             return CreatedAtAction("Login", new { username = UserName }, user);
+        }
+
+        [HttpPost]
+        public ActionResult Login(string username, string password)
+        {
+            bool userExists = Helper.AuthenticateUser(username, Helper.GetHash(password), _connectionString);
+
+            if (userExists)
+            {
+                var token = Helper.GenerateJSONWebToken(username, _configuration);
+                return Ok(new { token = token });
+            }
+
+            return Unauthorized();
         }
     }
 }

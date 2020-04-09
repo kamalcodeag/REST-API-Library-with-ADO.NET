@@ -6,13 +6,14 @@ using System.Threading.Tasks;
 
 namespace LibraryAPI.Models
 {
-    public class User
+    public class Author
     {
+        public Guid ID { get; set; }
         [Required]
         public string FullName { get; set; }
         [Required]
-        public string UserName { get; set; }
-        [Required]
-        public string Password { get; set; }
+        public string Nationality { get; set; }
+        [Required, DataType(DataType.DateTime)]
+        public DateTime BirthDate { get; set; }
     }
 }
