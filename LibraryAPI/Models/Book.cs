@@ -15,5 +15,6 @@ namespace LibraryAPI.Models
         public string Genre { get; set; }
         [Required, DataType(DataType.DateTime)]
         public DateTime ReleaseDate { get; set; }
+        public string AuthorName { get; set; }
     }
 }

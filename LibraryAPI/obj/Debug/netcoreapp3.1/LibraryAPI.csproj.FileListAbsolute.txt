@@ -109,3 +109,4 @@ D:\Programming\Other\LibraryAPI\LibraryAPI\bin\Debug\netcoreapp3.1\Swashbuckle.A
 D:\Programming\Other\LibraryAPI\LibraryAPI\obj\Debug\netcoreapp3.1\LibraryAPI.csproj.CoreCompileInputs.cache
 D:\Programming\Other\LibraryAPI\LibraryAPI\obj\Debug\netcoreapp3.1\LibraryAPI.MvcApplicationPartsAssemblyInfo.cs
 D:\Programming\Other\LibraryAPI\LibraryAPI\obj\Debug\netcoreapp3.1\LibraryAPI.MvcApplicationPartsAssemblyInfo.cache
+D:\Programming\Other\LibraryAPI\LibraryAPI\obj\Debug\netcoreapp3.1\LibraryAPI.csprojAssemblyReference.cache

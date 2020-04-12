@@ -20,7 +20,7 @@ using Newtonsoft.Json;
 namespace LibraryAPI.Controllers
 {
     [Authorize]
-    [Route("api/[controller]/[action]")]
+    [Route("api/[controller]")]
     [ApiController]
     public class BookController : ControllerBase
     {
@@ -59,7 +59,10 @@ namespace LibraryAPI.Controllers
 
             using (SqlConnection connection = new SqlConnection(_connectionString))
             {
-                SqlCommand command = new SqlCommand("select * from Books", connection);
+                //SqlCommand command = new SqlCommand("select * from Books", connection);
+                SqlCommand command = new SqlCommand(@"select Books.*, Authors.FullName as AuthorName from Books
+                                                      join BookAuthors on Books.ID = BookAuthors.BooksID
+                                                      join Authors on Authors.ID = BookAuthors.AuthorsID", connection);
                 connection.Open();
                 SqlDataReader reader = command.ExecuteReader();
                 while (reader.Read())
@@ -88,8 +91,13 @@ namespace LibraryAPI.Controllers
             Book book = new Book();
             using (SqlConnection connection = new SqlConnection(_connectionString))
             {
-                SqlCommand command = new SqlCommand("select * from Books where ID = @id", connection);
-                command.Parameters.AddWithValue("@id", id);
+                //SqlCommand command = new SqlCommand("select * from Books where ID = @id", connection);
+                SqlCommand command = new SqlCommand(@"select Books.*, Authors.FullName as AuthorName from Books
+                                                        join BookAuthors on Books.ID = BookAuthors.BooksID
+                                                        join Authors on Authors.ID = BookAuthors.AuthorsID
+                                                        where BookAuthors.BooksID = @BooksId", connection);
+                //command.Parameters.AddWithValue("@id", id);
+                command.Parameters.AddWithValue("@BooksId", id);
                 connection.Open();
                 SqlDataReader reader = command.ExecuteReader();
                 while (reader.Read())
@@ -99,6 +107,54 @@ namespace LibraryAPI.Controllers
             }
 
             return Ok(book);
+        }
+
+        [HttpGet("byauthor/{authorName}")]
+        public ActionResult<IEnumerable<Book>> GetBookByAuthorName(string authorName)
+        {
+            Author author = new Author();
+            string authorId = null;
+
+            using (SqlConnection connection = new SqlConnection(_connectionString))
+            {
+                SqlCommand command = new SqlCommand("select * from Authors where FullName = @FullName", connection);
+                command.Parameters.AddWithValue("@FullName", authorName);
+                connection.Open();
+                SqlDataReader reader = command.ExecuteReader();
+                while (reader.Read())
+                {
+                    author = Helper.ADONetToClass<Author>(reader);
+                    authorId = author.ID.ToString();
+                }
+            }
+
+            List<Book> books = new List<Book>();
+            Book book = null;
+
+            if (authorId != null)
+            {
+                using (SqlConnection connection = new SqlConnection(_connectionString))
+                {
+                    SqlCommand command = new SqlCommand(@"select Books.*, Authors.FullName as AuthorName from Books
+                                                        join BookAuthors on Books.ID = BookAuthors.BooksID
+                                                        join Authors on Authors.ID = BookAuthors.AuthorsID
+                                                        where BookAuthors.AuthorsID = @AuthorId", connection);
+                    command.Parameters.AddWithValue("@AuthorId", authorId);
+                    connection.Open();
+                    SqlDataReader reader = command.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        book = Helper.ADONetToClass<Book>(reader);
+                        books.Add(book);
+                    }
+                }
+            }
+            else
+            {
+                return NotFound();
+            }
+
+            return Ok(books);
         }
 
         [HttpPost]
