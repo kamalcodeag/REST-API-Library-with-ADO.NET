@@ -52,6 +52,7 @@ namespace LibraryAPI
             {
                 options.SwaggerDoc(name: "v1", new OpenApiInfo { Title = "LibraryAPI by Kamal Guliyev", Version = "v1"});
             });
+            services.AddRouting(options => options.LowercaseUrls = true);
             services.AddMvc();
         }
 

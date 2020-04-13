@@ -160,63 +160,78 @@ namespace LibraryAPI.Controllers
         [HttpPost]
         public ActionResult<Book> PublishBook(Book book)
         {
-            #region By manual
-            //var ID = Guid.NewGuid().ToString();
-            //var BookName = book.BookName;
-            //var Genre = book.Genre;
-            //var ReleaseDate = book.ReleaseDate;
+            string fullName = book.AuthorName;
+            SqlConnection conn = new SqlConnection(_connectionString);
+            SqlCommand comm = new SqlCommand("select * from Authors where FullName = @FullName", conn);
+            comm.Parameters.AddWithValue("@FullName", fullName);
+            conn.Open();
+            SqlDataReader reader = comm.ExecuteReader();
+            var authorsID = "";
+            while (reader.Read())
+            {
+                authorsID = reader["ID"].ToString();
+            }
 
-            //using (SqlConnection connection = new SqlConnection(_connectionString))
-            //{
-            //    SqlCommand command = new SqlCommand("insert into Books values(@ID, @BookName, @Genre, @ReleaseDate)", connection);
-            //    command.Parameters.AddWithValue("@ID", ID);
-            //    command.Parameters.AddWithValue("@BookName", BookName);
-            //    command.Parameters.AddWithValue("@Genre", Genre);
-            //    command.Parameters.AddWithValue("@ReleaseDate", ReleaseDate);
-            //    connection.Open();
-            //    command.ExecuteNonQuery();
-            //}
-            #endregion
-
-            var type = typeof(Book);
-            var properties = type.GetProperties();
             var ID = Guid.NewGuid().ToString();
-            StringBuilder commandText = new StringBuilder("insert into Books values(@ID, ");
 
-            SqlConnection connection = new SqlConnection();
-            connection.ConnectionString = _connectionString;
-            SqlCommand command = new SqlCommand();
-            command.Connection = connection;
-
-            for (int i = 1; i < properties.Length; i++)
+            if (reader.HasRows)
             {
-                if (i != properties.Length - 1)
+                var type = typeof(Book);
+                var properties = type.GetProperties();
+                StringBuilder commandText = new StringBuilder("insert into Books values(@ID, ");
+
+                SqlConnection connection = new SqlConnection();
+                connection.ConnectionString = _connectionString;
+                SqlCommand command = new SqlCommand();
+                command.Connection = connection;
+
+                for (int i = 1; i < properties.Length - 1; i++)
                 {
-                    commandText.Append($"@{properties[i].Name}, ");
+                    if (i != properties.Length - 2)
+                    {
+                        commandText.Append($"@{properties[i].Name}, ");
+                    }
+                    else
+                    {
+                        commandText.Append($"@{properties[i].Name})");
+                    }
                 }
-                else
+
+                command.CommandText = commandText.ToString();
+
+                for (int i = 0; i < properties.Length - 1; i++)
                 {
-                    commandText.Append($"@{properties[i].Name})");
+                    if (i == 0)
+                    {
+                        command.Parameters.AddWithValue($"{@properties[i].Name}", ID);
+                    }
+                    else
+                    {
+                        command.Parameters.AddWithValue($"{@properties[i].Name}", properties[i].GetValue(book));
+                    }
+                }
+
+                connection.Open();
+                command.ExecuteNonQuery();
+                connection.Close();
+
+                using (SqlConnection con = new SqlConnection(_connectionString))
+                {
+                    var bridgeID = Guid.NewGuid().ToString();
+                    SqlCommand command2 = new SqlCommand("insert into BookAuthors values(@ID, @AuthorsID, @BooksID)", con);
+                    command2.Parameters.AddWithValue("@ID", bridgeID);
+                    command2.Parameters.AddWithValue("@AuthorsID", authorsID);
+                    command2.Parameters.AddWithValue("@BooksID", ID);
+                    con.Open();
+                    command2.ExecuteNonQuery();
                 }
             }
-
-            command.CommandText = commandText.ToString();
-
-            for (int i = 0; i < properties.Length; i++)
+            else
             {
-                if (i == 0)
-                {
-                    command.Parameters.AddWithValue($"{@properties[i].Name}", ID);
-                }
-                else
-                {
-                    command.Parameters.AddWithValue($"{@properties[i].Name}", properties[i].GetValue(book));
-                }
+                return BadRequest();
             }
 
-            connection.Open();
-            command.ExecuteNonQuery();
-            connection.Close();
+            conn.Close();
 
             return CreatedAtAction("GetBook", new { id = ID }, book);
         }
@@ -224,46 +239,76 @@ namespace LibraryAPI.Controllers
         [HttpPut("{id}")]
         public ActionResult UpdateBook(string id, Book book)
         {
-            var type = typeof(Book);
-            var properties = type.GetProperties();
-
-            StringBuilder commandText = new StringBuilder("update Books set ");
-            //update Books set BookName = @BookName, Genre = @Genre, ReleaseDate = @ReleaseDate where ID = @id
-
-            SqlConnection connection = new SqlConnection();
-            connection.ConnectionString = _connectionString;
-            SqlCommand command = new SqlCommand();
-            command.Connection = connection;
-
-            for (int i = 1; i < properties.Length; i++)
+            string newFullName = book.AuthorName;
+            SqlConnection conn = new SqlConnection(_connectionString);
+            SqlCommand comm = new SqlCommand("select * from Authors where FullName = @FullName", conn);
+            comm.Parameters.AddWithValue("@FullName", newFullName);
+            conn.Open();
+            SqlDataReader reader = comm.ExecuteReader();
+            var newAuthorsID = "";
+            while (reader.Read())
             {
-                if (i != properties.Length - 1)
-                {
-                    commandText.Append($"{properties[i].Name} = @{properties[i].Name}, ");
-                }
-                else
-                {
-                    commandText.Append($"{properties[i].Name} = @{properties[i].Name} where {properties[0].Name} = @id");
-                }
+                newAuthorsID = reader["ID"].ToString();
             }
 
-            command.CommandText = commandText.ToString();
-
-            for (int i = 0; i < properties.Length; i++)
+            if(reader.HasRows)
             {
-                if (i == 0)
+                var type = typeof(Book);
+                var properties = type.GetProperties();
+
+                StringBuilder commandText = new StringBuilder("update Books set ");
+                //update Books set BookName = @BookName, Genre = @Genre, ReleaseDate = @ReleaseDate where ID = @id
+
+                SqlConnection connection = new SqlConnection();
+                connection.ConnectionString = _connectionString;
+                SqlCommand command = new SqlCommand();
+                command.Connection = connection;
+
+                for (int i = 1; i < properties.Length - 1; i++)
                 {
-                    command.Parameters.AddWithValue("@id", id);
+                    if (i != properties.Length - 2)
+                    {
+                        commandText.Append($"{properties[i].Name} = @{properties[i].Name}, ");
+                    }
+                    else
+                    {
+                        commandText.Append($"{properties[i].Name} = @{properties[i].Name} where {properties[0].Name} = @id");
+                    }
                 }
-                else
+
+                command.CommandText = commandText.ToString();
+
+                for (int i = 0; i < properties.Length - 1; i++)
                 {
-                    command.Parameters.AddWithValue($"{@properties[i].Name}", properties[i].GetValue(book));
+                    if (i == 0)
+                    {
+                        command.Parameters.AddWithValue("@id", id);
+                    }
+                    else
+                    {
+                        command.Parameters.AddWithValue($"{@properties[i].Name}", properties[i].GetValue(book));
+                    }
+                }
+
+                connection.Open();
+                command.ExecuteNonQuery();
+                connection.Close();
+
+                using (SqlConnection con = new SqlConnection(_connectionString))
+                {
+                    SqlCommand command2 = new SqlCommand("update BookAuthors set AuthorsID = @AuthorsID where BooksID = @BooksID", con);
+                    command2.Parameters.AddWithValue("@AuthorsID", newAuthorsID);
+                    command2.Parameters.AddWithValue("@BooksID", id);
+                    con.Open();
+                    command2.ExecuteNonQuery();
                 }
             }
+            else
+            {
+                return BadRequest();
+            }
 
-            connection.Open();
-            command.ExecuteNonQuery();
-            connection.Close();
+            conn.Close();
 
             return NoContent();
         }
@@ -271,6 +316,14 @@ namespace LibraryAPI.Controllers
         [HttpDelete("{id}")]
         public ActionResult DeleteBook(string id)
         {
+            using (SqlConnection connection = new SqlConnection(_connectionString))
+            {
+                SqlCommand command = new SqlCommand("delete from BookAuthors where BooksID = @id", connection);
+                command.Parameters.AddWithValue("@id", id);
+                connection.Open();
+                command.ExecuteNonQuery();
+            }
+
             using (SqlConnection connection = new SqlConnection(_connectionString))
             {
                 SqlCommand command = new SqlCommand("delete from Books where ID = @id", connection);

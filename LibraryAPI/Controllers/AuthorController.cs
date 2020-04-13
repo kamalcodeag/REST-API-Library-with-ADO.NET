@@ -14,7 +14,7 @@ using Microsoft.Extensions.Configuration;
 namespace LibraryAPI.Controllers
 {
     [Authorize]
-    [Route("api/[controller]/[action]")]
+    [Route("api/[controller]")]
     [ApiController]
     public class AuthorController : ControllerBase
     {
