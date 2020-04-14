@@ -85,9 +85,23 @@ namespace LibraryAPI.Controllers
             return Ok(books);
         }
 
-        [HttpGet("{id}")]
-        public ActionResult<Book> GetBook(string id)
+        [HttpGet("{id}/{authorName}")]
+        public ActionResult<IEnumerable<Book>> GetBook(string id, string authorName)
         {
+            string authorsId = "";
+            using (SqlConnection conn = new SqlConnection(_connectionString))
+            {
+                SqlCommand command = new SqlCommand(@"select * from Authors where FullName = @FullName", conn);
+                command.Parameters.AddWithValue("@FullName", authorName);
+                conn.Open();
+                SqlDataReader reader = command.ExecuteReader();
+                while (reader.Read())
+                {
+                    authorsId = reader["ID"].ToString();
+                }
+            }
+
+            //List<Book> books = new List<Book>();
             Book book = new Book();
             using (SqlConnection connection = new SqlConnection(_connectionString))
             {
@@ -95,14 +109,16 @@ namespace LibraryAPI.Controllers
                 SqlCommand command = new SqlCommand(@"select Books.*, Authors.FullName as AuthorName from Books
                                                         join BookAuthors on Books.ID = BookAuthors.BooksID
                                                         join Authors on Authors.ID = BookAuthors.AuthorsID
-                                                        where BookAuthors.BooksID = @BooksId", connection);
+                                                        where BookAuthors.BooksID = @BooksId and BookAuthors.AuthorsID = @AuthorsId", connection);
                 //command.Parameters.AddWithValue("@id", id);
                 command.Parameters.AddWithValue("@BooksId", id);
+                command.Parameters.AddWithValue("@AuthorsId", authorsId);
                 connection.Open();
                 SqlDataReader reader = command.ExecuteReader();
                 while (reader.Read())
                 {
                     book = Helper.ADONetToClass<Book>(reader);
+                    //books.Add(book);
                 }
             }
 
@@ -236,22 +252,35 @@ namespace LibraryAPI.Controllers
             return CreatedAtAction("GetBook", new { id = ID }, book);
         }
 
-        [HttpPut("{id}")]
-        public ActionResult UpdateBook(string id, Book book)
+        [HttpPut("{id}/{authorName}")]
+        public ActionResult UpdateBook(string id, string authorName, Book book)
         {
+            SqlDataReader rdr = null;
+            string oldAuthorsId = "";
+            SqlConnection co = new SqlConnection(_connectionString);
+            SqlCommand com = new SqlCommand(@"select * from Authors where FullName = @FullName", co);
+            com.Parameters.AddWithValue("@FullName", authorName);
+            co.Open();
+            rdr = com.ExecuteReader();
+            while (rdr.Read())
+            {
+                oldAuthorsId = rdr["ID"].ToString();
+            }
+
+            SqlDataReader reader = null;
             string newFullName = book.AuthorName;
             SqlConnection conn = new SqlConnection(_connectionString);
             SqlCommand comm = new SqlCommand("select * from Authors where FullName = @FullName", conn);
             comm.Parameters.AddWithValue("@FullName", newFullName);
             conn.Open();
-            SqlDataReader reader = comm.ExecuteReader();
+            reader = comm.ExecuteReader();
             var newAuthorsID = "";
             while (reader.Read())
             {
                 newAuthorsID = reader["ID"].ToString();
             }
 
-            if(reader.HasRows)
+            if(rdr.HasRows && reader.HasRows)
             {
                 var type = typeof(Book);
                 var properties = type.GetProperties();
@@ -296,9 +325,10 @@ namespace LibraryAPI.Controllers
 
                 using (SqlConnection con = new SqlConnection(_connectionString))
                 {
-                    SqlCommand command2 = new SqlCommand("update BookAuthors set AuthorsID = @AuthorsID where BooksID = @BooksID", con);
+                    SqlCommand command2 = new SqlCommand("update BookAuthors set AuthorsID = @AuthorsID where BooksID = @BooksID and AuthorsID = @OldAuthorsID", con);
                     command2.Parameters.AddWithValue("@AuthorsID", newAuthorsID);
                     command2.Parameters.AddWithValue("@BooksID", id);
+                    command2.Parameters.AddWithValue("@OldAuthorsID", oldAuthorsId);
                     con.Open();
                     command2.ExecuteNonQuery();
                 }
@@ -308,6 +338,7 @@ namespace LibraryAPI.Controllers
                 return BadRequest();
             }
 
+            co.Close();
             conn.Close();
 
             return NoContent();
